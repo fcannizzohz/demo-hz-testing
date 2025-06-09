@@ -6,6 +6,9 @@ import static org.mockito.Mockito.when;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+import com.hazelcast.test.TestHazelcastInstanceFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,4 +41,8 @@ class CustomerServiceTest {
         assertEquals("Alice", sut.findCustomer("123").name());
     }
 
+    @AfterEach
+    public void after() {
+        Hazelcast.shutdownAll();
+    }
 }

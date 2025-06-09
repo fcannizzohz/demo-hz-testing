@@ -61,3 +61,13 @@ they should be limited to testing only the network  configuration and bootstrap 
 
 A more reliable mechanism to test business logic in using tests it to adopt the Hazelcast Mock network. 
 
+> [!NOTE]
+> To reduce brittleness introduced by spinning up real Hazelcast instances, it's recommended 
+> to shutdown the instances after the end of each test, or as soon as desirable, using for example:
+> 
+> ```java
+>     @AfterEach
+>     public void after() {
+>         Hazelcast.shutdownAll();
+>     }
+> ```
