@@ -3,6 +3,7 @@ package com.hazelcast.fcannizzohz;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
@@ -20,7 +20,7 @@ class CustomerServiceTest {
     HazelcastInstance hzInstance;
 
     @InjectMocks
-    CustomerServiceImpl service;
+    HzCustomerService service;
 
     @Test
     void testFindCustomerWithMock() {
@@ -31,8 +31,11 @@ class CustomerServiceTest {
     }
 
     @Test
-    void testFindCustomer() {
-
-
+    void testFindCustomerNativeHz() {
+        HazelcastInstance instance = Hazelcast.newHazelcastInstance();
+        instance.getMap("customers").put("123", new Customer("123", "Alice"));
+        HzCustomerService sut = new HzCustomerService(instance);
+        assertEquals("Alice", sut.findCustomer("123").name());
     }
+
 }

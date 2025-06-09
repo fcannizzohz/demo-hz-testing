@@ -35,3 +35,29 @@ An example of mocking Hazelcast interfaces is [here](https://github.com/fcannizz
         assertEquals("Alice", service.findCustomer("123").name());
     }
 ```
+
+### Testing with embedded Hazelcast
+
+While not mocking per se, **embedded Hazelcast instances** are created **in-memory** and are the recommended way to simulate a full
+cluster without external setup.
+
+The most immediate way to test using embedded hazelcast is to create an instance of the server in the test itself. For example:
+
+```java
+    @Test
+    void testFindCustomerNativeHz() {
+        HazelcastInstance instance = Hazelcast.newHazelcastInstance();
+        instance.getMap("customers").put("123", new Customer("123", "Alice"));
+        HzCustomerService sut = new HzCustomerService(instance);
+        assertEquals("Alice", sut.findCustomer("123").name());
+    }
+```
+
+This method allows testing of the application logic in a realistic environment that realistically mirrors the production behaviour. 
+It allows testing of actual serialization, configuration and discovery mechanisms, network comms and potential runtime issues like 
+port conflicts and bootstrap failures. However it comes with some trade-offs: native instances are slower to start and may conflict 
+with system ports and therefore  in CI/CD environments may introduce flakiness and brittleness. While valuable integration tools, 
+they should be limited to testing only the network  configuration and bootstrap process and not leaked to test business logic. 
+
+A more reliable mechanism to test business logic in using tests it to adopt the Hazelcast Mock network. 
+

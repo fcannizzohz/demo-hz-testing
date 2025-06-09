@@ -3,10 +3,10 @@ package com.hazelcast.fcannizzohz;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 
-public class CustomerServiceImpl implements CustomerService {
+public class HzCustomerService implements CustomerService {
     private final HazelcastInstance instance;
 
-    public CustomerServiceImpl(HazelcastInstance instance) {
+    public HzCustomerService(HazelcastInstance instance) {
         this.instance = instance;
     }
 
