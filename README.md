@@ -71,3 +71,37 @@ A more reliable mechanism to test business logic in using tests it to adopt the 
 >         Hazelcast.shutdownAll();
 >     }
 > ```
+
+### Testing with embedded Hazelcast mock network
+
+To overcome the possible environment conflicts and the slower nature of the full Hazelcast instance, embedded in unit testing, 
+Hazelcast provides a Mock Network instances that don't rely on setting up the TCP stack to correctly bootstrap.
+
+Embedded instances spawned via the Mock Network are **real**, lightweight nodes recommended for use in unit or integration tests.
+
+To access the Mock Network classes, the maven dependency must be included using the `tests` classifier:
+
+```xml
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast</artifactId>
+      <version>{hz.version}</version>
+      <classifier>tests</classifier>
+    </dependency>
+```
+
+The [Hazelcast docs](https://docs.hazelcast.com/hazelcast/5.5/test/testing) contain further details on how to setup the unit tests 
+and for examples to test streaming applications. Here we will focus on the basic utilization.
+
+For example:
+
+```java
+    @Test
+    void testFindCustomerHzLightweight() {
+        TestHazelcastInstanceFactory factory = new TestHazelcastInstanceFactory(1);
+        HazelcastInstance instance = factory.newHazelcastInstance();
+        instance.getMap("customers").put("123", new Customer("123", "Alice"));
+        HzCustomerService sut = new HzCustomerService(instance);
+        assertEquals("Alice", sut.findCustomer("123").name());
+    }
+```
