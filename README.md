@@ -256,3 +256,42 @@ With `JetTestSupport` utility methods available, one can test distributed jobs l
         assertTrue(result.stream().anyMatch(o -> o.customerName().equals("Bob")));
     }
 ```
+
+The approach shown in the previous example doesn't work in cases where streams are never ending. 
+In this case, an approach based on a set of `assert*` utilities that can be injected in the pipeline is preferable.
+
+For example, here we inject a data source and assert on the number of received items in the output stream.
+
+```java
+    @Test
+    public void testStreamingEnrichmentWithInlineAssertion() {
+        IMap<String, Customer> customerMap = instance.getMap("customers");
+        customerMap.put("c1", new Customer("c1", "Alice"));
+        customerMap.put("c2", new Customer("c2", "Bob"));
+
+        // Streaming source
+        StreamSource<Order> source = TestSources.itemStream(50, (ts, seq) -> {
+            String customerId = seq % 2 == 0 ? "c1" : "c2";
+            return new Order("o" + seq, customerId, "Product" + seq);
+        });
+
+        Pipeline pipeline = Pipeline.create();
+        OrderEnrichmentPipeline.enrich(pipeline, source)
+                               .apply(Assertions.assertCollectedEventually(5,
+                                       list -> assertTrue("Expected at least 10 enriched orders", list.size() >= 10)));
+
+        Job job = instance.getJet().newJob(pipeline);
+
+        // The assertion will stop the job automatically via AssertionCompletedException by assertCollectedEventually
+        try {
+            job.join();
+            fail("Expected job to terminate with AssertionCompletedException");
+        } catch (CompletionException e) {
+            if (!causedBy(e, AssertionCompletedException.class)) {
+                throw e; // rethrow if it wasn't the expected assertion exit
+            }
+        }
+    }
+```
+
+More assertions are available and [documented](https://docs.hazelcast.com/hazelcast/5.5/test/testing#assertions). 
