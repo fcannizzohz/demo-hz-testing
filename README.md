@@ -229,3 +229,30 @@ To use `JetTestSupport` the following dependencies must be included:
     </dependency>
 ```
 
+With `JetTestSupport` utility methods available, one can test distributed jobs like:
+
+```java
+    @Test
+    public void testJetOrderEnrichmentWithHazelcastState() {
+        HazelcastInstance instance = createHazelcastInstance();
+
+        JetService jet = instance.getJet();
+
+        IMap<String, Customer> customerMap = instance.getMap("customers");
+        customerMap.put("c1", new Customer("c1", "Alice"));
+        customerMap.put("c2", new Customer("c2", "Bob"));
+
+        BatchSource<Order> source = TestSources.items(
+                new Order("o1", "c1", "Laptop"),
+                new Order("o2", "c2", "Phone")
+        );
+        Job job = jet.newJob(OrderEnrichmentPipeline.build(source));
+        job.join(); // wait for completion
+
+        IList<EnrichedOrder> result = instance.getList("enriched-orders");
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(o -> o.customerName().equals("Alice")));
+        assertTrue(result.stream().anyMatch(o -> o.customerName().equals("Bob")));
+    }
+```
