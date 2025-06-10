@@ -24,5 +24,4 @@ public class HzCustomerService
         return instance.getMap("customers");
     }
 
-    ;
 }

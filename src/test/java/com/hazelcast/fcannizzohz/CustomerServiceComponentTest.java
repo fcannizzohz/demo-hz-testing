@@ -22,7 +22,8 @@ import static org.junit.Assert.assertEquals;
  * </ul>
  * </p>
  */
-public class CustomerServiceComponentTest extends HazelcastTestSupport {
+public class CustomerServiceComponentTest
+        extends HazelcastTestSupport {
     private HazelcastInstance hz;
 
     @Test

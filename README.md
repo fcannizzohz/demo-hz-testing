@@ -86,32 +86,32 @@ For example:
 
 ```java
     @Test
-   public void findCustomerSingleNode() {
-      HazelcastInstance instance = createHazelcastInstance();
-      instance.getMap("customers").put("123", new Customer("123", "Alice"));
-      HzCustomerService sut = new HzCustomerService(instance);
-      assertEquals("Alice", sut.findCustomer("123").name());
-   }
+    public void findCustomerSingleNode() {
+        HazelcastInstance instance = createHazelcastInstance();
+        instance.getMap("customers").put("123", new Customer("123", "Alice"));
+        HzCustomerService sut = new HzCustomerService(instance);
+        assertEquals("Alice", sut.findCustomer("123").name());
+    }
 ```
 or, with a multi node setup:
 
 ```java
     @Test
-   public void findCustomerTwoNodes() {
-      HazelcastInstance[] instances = createHazelcastInstances(2);
-      HazelcastInstance node1 = instances[0];
-      HazelcastInstance node2 = instances[1];
+    public void findCustomerTwoNodes() {
+        HazelcastInstance[] instances = createHazelcastInstances(2);
+        HazelcastInstance node1 = instances[0];
+        HazelcastInstance node2 = instances[1];
    
-      // data injected in node1
-      node1.getMap("customers").put("123", new Customer("123", "Alice"));
+        // data injected in node1
+        node1.getMap("customers").put("123", new Customer("123", "Alice"));
    
-      // data retrieved from node2
-      HzCustomerService sut2 = new HzCustomerService(node2);
-      assertEquals("Alice", sut2.findCustomer("123").name());
-   }
+        // data retrieved from node2
+        HzCustomerService sut2 = new HzCustomerService(node2);
+        assertEquals("Alice", sut2.findCustomer("123").name());
+    }
 ```
 
->[!NOTE] When creating instances with `createHazelcastInstances()` it's best practice to shutdown them at the end of each test to
+> **NOTE**: When creating instances with `createHazelcastInstances()` it's best practice to shutdown them at the end of each test to
 > free up resources and prevent test brittleness:
 > ```java
 > @After
@@ -122,8 +122,11 @@ or, with a multi node setup:
 
 ### Testing complex test scenarios
 
-This approach allows testing realistic behaviour in a fast and controlled environment. For example, a scenario testing the 
-integration of two services:
+This approach allows testing realistic behaviour in a fast and controlled environment. 
+
+#### Testing the integration of two services
+
+In the following example, two services (`Customer`and `Order` share state via Hazelcast.) Functionality can be tested as following:
 
 ```java
     @Test
@@ -149,7 +152,9 @@ integration of two services:
     }
 ```
 
-Another example, when testing a component integration with its dependencies:
+### Testing a component integration with its dependencies
+
+Another typical scenario consist of testing the integration of a component, in isolation, but integrated with its dependencies:
 
 ```java
     @Test
@@ -179,6 +184,29 @@ Another example, when testing a component integration with its dependencies:
         assertEquals("Alice", fromStore.name());
     }
 
+```
+
+### Testing integrated behaviour
+
+`HazelcastTestSupport` supports testing of the application using the Hazelcast capabilities, for example, in this case, the 
+execution of a listener:
+
+```java
+    @Test
+    public void testOrderServiceListener() throws Exception {
+        instance = createHazelcastInstance();
+        // set a customer
+        instance.getMap("customers").put("c1", new Customer("c1", "Alice"));
+
+        OrderService sut = new HzOrderService(instance, mockConsumer);
+
+        Order order = new Order("o1", "c1", "Laptop");
+        sut.placeOrder(order);
+        // Update the order so hazelcast triggers the event
+        sut.updateOrder(order.confirm());
+        
+        verify(mockConsumer, timeout(100).only()).accept(any(Order.class));
+    }
 ```
 
 ### Testing streaming applications

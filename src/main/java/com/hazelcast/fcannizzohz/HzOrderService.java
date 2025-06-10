@@ -3,22 +3,22 @@ package com.hazelcast.fcannizzohz;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import com.hazelcast.map.listener.EntryExpiredListener;
+import com.hazelcast.map.listener.EntryUpdatedListener;
 
 import java.io.Serializable;
 import java.util.function.Consumer;
 
-class OrderExpiredListener
-        implements EntryExpiredListener<String, Order>, Serializable {
+class OrderUpdatedListener
+        implements EntryUpdatedListener<String, Order>, Serializable {
 
     private final Consumer<Order> listener;
 
-    OrderExpiredListener(Consumer<Order> listener) {
+    OrderUpdatedListener(Consumer<Order> listener) {
         this.listener = listener;
     }
 
     @Override
-    public void entryExpired(EntryEvent<String, Order> event) {
+    public void entryUpdated(EntryEvent<String, Order> event) {
         listener.accept(event.getValue());
     }
 }
@@ -30,10 +30,11 @@ public class HzOrderService
     public HzOrderService(HazelcastInstance hz) {
         this(hz, null);
     }
-    public HzOrderService(HazelcastInstance hz, Consumer<Order> onExpiryCallback) {
+
+    public HzOrderService(HazelcastInstance hz, Consumer<Order> onEntryUpdatedCallback) {
         this.instance = hz;
-        if (onExpiryCallback != null) {
-            orderMap().addEntryListener(new OrderExpiredListener(onExpiryCallback), true);
+        if (onEntryUpdatedCallback != null) {
+            orderMap().addEntryListener(new OrderUpdatedListener(onEntryUpdatedCallback), true);
         }
     }
 
@@ -52,12 +53,17 @@ public class HzOrderService
         if (customer == null) {
             throw new IllegalStateException("Customer does not exist: " + order.customerId());
         }
-        orderMap().put(order.id(), order); // store order if valid
+        updateOrder(order);
     }
 
     @Override
     public Order getOrder(String id) {
         return orderMap().get(id);
+    }
+
+    @Override
+    public void updateOrder(Order order) {
+        orderMap().put(order.id(), order);
     }
 
 }

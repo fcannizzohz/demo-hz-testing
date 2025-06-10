@@ -9,7 +9,8 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
-public class CustomerServiceWithSupportTest extends HazelcastTestSupport {
+public class CustomerServiceWithSupportTest
+        extends HazelcastTestSupport {
     private HazelcastInstance instance;
     private HazelcastInstance[] cluster;
 
@@ -37,10 +38,10 @@ public class CustomerServiceWithSupportTest extends HazelcastTestSupport {
 
     @After
     public void tearDown() {
-        if(instance != null) {
+        if (instance != null) {
             instance.shutdown();
         }
-        if(cluster != null) {
+        if (cluster != null) {
             Arrays.stream(cluster).forEach(HazelcastInstance::shutdown);
         }
     }
