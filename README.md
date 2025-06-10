@@ -3,17 +3,7 @@
 Testing applications that use Hazelcast (IMDG and Streaming) requires care to validate the behaviour at various levels - from 
 unit to system tests - given Hazelcast’s distributed, eventually consistent and asynchronous behaviour.
 
-## Unit testing
-
-The purpose of unit tests is to test individual components (e.g., services, classes, listeners, processors) in isolation, 
-focusing on their functional correctness.
-
-Developers have two primary options:
-
- - **Mock Hazelcast interfaces** using libraries like [Mockito](mockito.org)
- - Use **embedded Hazelcast instances** created in-memory via the test factory
-
-### Mocking Hazelcast Interfaces
+## Mocking Hazelcast Interfaces
 
 Mocking Hazelcast APIs allows you to isolate the class under test and control its dependencies.  The advantages of this approach are:
 
@@ -41,17 +31,19 @@ An example of mocking Hazelcast interfaces is:
     }
 ```
 
-In here Mockito is used to mock the behaviour of the Hazelcast instance and of the `"customer"` `ÌMap` to validate the behaviour of the `findCustomer()` interface method.
-
-### Testing with embedded Hazelcast mock network
+## Testing with embedded Hazelcast mock network
 
 While not mocking per se, **embedded Hazelcast instances** are real, in-memory cluster nodes ideal for local testing. 
 They enable realistic behaviour without requiring external setup.
 
-> [!NOTE] Developers should use, in unit test scenarios, `TestHazelcastInstanceFactory` over `Hazelcast.newHazelcastInstance()`.
-> The latter creates full Hazelcast nodes and may interfere with local networking (e.g., TCP/IP stack, port conflicts), making tests slower and possibly more brittle.
+Unless for specific reasons regarding testing of network deployments developers should use, `HazelcastTestSupport` over
+running fully fledged instances started with `Hazelcast.newHazelcastInstance()`.
+The latter creates full Hazelcast nodes and may interfere with local networking (e.g., TCP/IP stack, port conflicts), making 
+tests slower and possibly more brittle.
 
-To use Hazelcast’s mock network test support, you must include the test dependency with the `tests` classifier:
+### Setting up the Hazelcast Test support
+
+The `HazelcastTestSupport` requires following dependency with the `tests` classifier:
 
 ```xml
     <dependency>
@@ -61,105 +53,151 @@ To use Hazelcast’s mock network test support, you must include the test depend
       <classifier>tests</classifier>
     </dependency>
 ```
-
-For example:
-
-```java
-    @Test
-    void testFindCustomerHzLightweight() {
-        TestHazelcastInstanceFactory factory = new TestHazelcastInstanceFactory(1);
-        HazelcastInstance instance = factory.newHazelcastInstance();
-        instance.getMap("customers").put("123", new Customer("123", "Alice"));
-        HzCustomerService sut = new HzCustomerService(instance);
-        assertEquals("Alice", sut.findCustomer("123").name());
-    }
-```
-or, with a multi node setup:
-
-```java
-    @Test
-    void findCustomerTwoNodes() {
-        TestHazelcastInstanceFactory factory = new TestHazelcastInstanceFactory(2);
-        HazelcastInstance node1 = factory.newHazelcastInstance();
-        HazelcastInstance node2 = factory.newHazelcastInstance();
-
-        // data injected in node1
-        node1.getMap("customers").put("123", new Customer("123", "Alice"));
-
-        // data retrieved from node2
-        HzCustomerService sut2 = new HzCustomerService(node2);
-        assertEquals("Alice", sut2.findCustomer("123").name());
-    }
-
-```
-
-This approach allows testing realistic behaviour in a fast and controlled environment, for single or multi node clusters.
-
-The [Hazelcast docs](https://docs.hazelcast.com/hazelcast/5.5/test/testing) contain further details on how to setup the unit tests
-and for examples to test streaming applications. Here we will focus on the basic utilization.
-
-Specifically it refers to the use of `JetTestSupport`. This is a valid approach but it forces the inclusion of the following 
-dependencies and the tests are JUnit4
+as well as the use of JUnit 4 and OpenTest4J:
 
 ```xml
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.2</version>
+      <version>{junit4.version}</version>
       <scope>test</scope>
     </dependency>
+   <dependency>
+      <groupId>org.opentest4j</groupId>
+      <artifactId>opentest4j</artifactId>
+      <version>{opentest4j.version}</version>
+      <scope>test</scope>
+   </dependency>
+```
+
+### Using `HazelcastTestSupport`
+
+A test class wanting to use `HazelcastTestSupport` must extend it, for example:
+
+```java
+import com.hazelcast.test.HazelcastTestSupport;
+
+class CustomerServiceWithSupportTest extends HazelcastTestSupport {
+}
+```
+
+By doing so, it has access to a variety of utility methods for reuse, including `createHazelcastInstance()`.
+For example:
+
+```java
+    @Test
+   public void findCustomerSingleNode() {
+      HazelcastInstance instance = createHazelcastInstance();
+      instance.getMap("customers").put("123", new Customer("123", "Alice"));
+      HzCustomerService sut = new HzCustomerService(instance);
+      assertEquals("Alice", sut.findCustomer("123").name());
+   }
+```
+or, with a multi node setup:
+
+```java
+    @Test
+   public void findCustomerTwoNodes() {
+      HazelcastInstance[] instances = createHazelcastInstances(2);
+      HazelcastInstance node1 = instances[0];
+      HazelcastInstance node2 = instances[1];
+   
+      // data injected in node1
+      node1.getMap("customers").put("123", new Customer("123", "Alice"));
+   
+      // data retrieved from node2
+      HzCustomerService sut2 = new HzCustomerService(node2);
+      assertEquals("Alice", sut2.findCustomer("123").name());
+   }
+```
+
+>[!NOTE] When creating instances with `createHazelcastInstances()` it's best practice to shutdown them at the end of each test to
+> free up resources and prevent test brittleness:
+> ```java
+> @After
+> public void tearDown() {
+>    instance.shutdown();
+> }
+> ```
+
+### Testing complex test scenarios
+
+This approach allows testing realistic behaviour in a fast and controlled environment. For example, a scenario testing the 
+integration of two services:
+
+```java
+    @Test
+    public void testCustomerAndOrderServicesIntegration() {
+        // Create a shared Hazelcast instance
+        instance = createHazelcastInstance();
+
+        // Instantiate both services using same cluster
+        CustomerService customerService = new HzCustomerService(instance);
+        OrderService orderService = new HzOrderService(instance);
+
+        // Add customer
+        Customer alice = new Customer("c1", "Alice");
+        customerService.save(alice);
+
+        // Place an order for Alice
+        Order order = new Order("o1", "c1", "Laptop");
+        orderService.placeOrder(order);
+
+        // Verify state across services
+        assertEquals("Alice", customerService.findCustomer("c1").name());
+        assertEquals("Laptop", orderService.getOrder("o1").product());
+    }
+```
+
+Another example, when testing a component integration with its dependencies:
+
+```java
+    @Test
+    public void customerServiceWithMapStoreInteractions()
+            throws Exception {
+        // Set up H2 in-memory DB
+        Connection conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        conn.createStatement().execute("CREATE TABLE customers (id VARCHAR PRIMARY KEY, name VARCHAR)");
+
+        // Set up Hazelcast config with MapStore
+        Config config = new Config();
+        config.getMapConfig("customers").getMapStoreConfig().setEnabled(true).setImplementation(new CustomerMapStore(conn));
+
+        hz = createHazelcastInstance(config);
+        CustomerService service = new HzCustomerService(hz);
+
+        // Act
+        service.save(new Customer("c1", "Alice")); // should go into both IMap and DB
+        Customer fromMap = service.findCustomer("c1");      // should be from IMap
+
+        // Clear IMap to test reloading from DB
+        hz.getMap("customers").evictAll();
+        Customer fromStore = service.findCustomer("c1");    // should be reloaded from H2
+
+        // Assert
+        assertEquals("Alice", fromMap.name());
+        assertEquals("Alice", fromStore.name());
+    }
+
+```
+
+### Testing streaming applications
+
+Hazelcast releases also support for testing streaming applications. This is done extending `JetTestSupport` (itself an extension 
+of `HazelcastTestSupport`). The [Hazelcast docs](https://docs.hazelcast.com/hazelcast/5.5/test/testing) provide further details.
+
+To use `JetTestSupport` the following dependencies must be included:
+
+```xml
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.20.0</version> <!-- or whatever latest you want -->
+      <version>{log4j.version}</version> <!-- or whatever latest you want -->
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <version>2.20.0</version>
+      <version>{log4j.version}</version>
     </dependency>
 ```
 
-## Integration testing
-
-Integration tests are be used to test integration between components using Hazelcast, including 
-
- - distributed data structures;
- - event listeners, enrty processors, and custom de/serializers;
- - specific behavioural configuration in Hazelcast like eviction policies, discovery of nodes,  time-to-live;
-
-These behaviours are highly dependent on Hazelcast configuration and runtime state, so tests should closely replicate 
-clustered environments.
-
-### Testing with embedded Hazelcast
-
-A common approach is to spin up embedded Hazelcast instances within the same JVM. This allows validation of distributed behaviour 
-without requiring an external cluster. For example:
-
-```java
-    @Test
-    void testFindCustomerNativeHz() {
-        HazelcastInstance instance = Hazelcast.newHazelcastInstance();
-        instance.getMap("customers").put("123", new Customer("123", "Alice"));
-        HzCustomerService sut = new HzCustomerService(instance);
-        assertEquals("Alice", sut.findCustomer("123").name());
-    }
-```
-
-This approach enables realistic testing of:
-
- - Actual serialization and custom serializers
- - Discovery configuration (e.g., TCP/IP, Multicast)
- - TTLs, eviction, map stores
- - Network communication and runtime issues (e.g., port conflicts)
-
-While embedded Hazelcast mirrors more closely production configuration and settings, it introduces **overhead and instability 
-risks** as it is slower to startup, may introduce brittleness due to network instability and port collisions in CI/CD environments.
-
-Finally, to reduce resources leaks and flaky tests, it's recommended to always **shut down** Hazelcast instances after each test run:
-```java
-    @AfterEach 
-    public void after() {
-        Hazelcast.shutdownAll();
-    }
-```

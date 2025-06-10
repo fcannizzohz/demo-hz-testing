@@ -1,20 +1,22 @@
 package com.hazelcast.fcannizzohz;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-class CustomerServiceTest  {
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
+public class CustomerServiceMockitoTest {
+
     @Mock
     IMap<String, Customer> customerMap;
+
     @Mock
     HazelcastInstance hzInstance;
 
@@ -22,11 +24,11 @@ class CustomerServiceTest  {
     HzCustomerService service;
 
     @Test
-    void findCustomerWithMock() {
+    public void findCustomerWithMock() {
         //noinspection unchecked,rawtypes
-        when(hzInstance.getMap("customers")).thenReturn((IMap) customerMap);
+        when(hzInstance.getMap("customers")).thenReturn((IMap)customerMap);
         when(customerMap.get("123")).thenReturn(new Customer("123", "Alice"));
+
         assertEquals("Alice", service.findCustomer("123").name());
     }
-
 }

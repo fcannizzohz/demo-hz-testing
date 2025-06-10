@@ -2,6 +2,6 @@ package com.hazelcast.fcannizzohz;
 
 import java.io.Serializable;
 
-public record Customer(String id, String name)
+public record Order(String id, String customerId, String product)
         implements Serializable {
 }

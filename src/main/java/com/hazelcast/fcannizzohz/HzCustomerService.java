@@ -3,7 +3,8 @@ package com.hazelcast.fcannizzohz;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 
-public class HzCustomerService implements CustomerService {
+public class HzCustomerService
+        implements CustomerService {
     private final HazelcastInstance instance;
 
     public HzCustomerService(HazelcastInstance instance) {
@@ -12,7 +13,16 @@ public class HzCustomerService implements CustomerService {
 
     @Override
     public Customer findCustomer(String id) {
-        IMap<String, Customer> map = this.instance.getMap("customers");
-        return map.get(id);
+        return customerMap().get(id);
     }
+
+    public void save(Customer customer) {
+        customerMap().put(customer.id(), customer);
+    }
+
+    private IMap<String, Customer> customerMap() {
+        return instance.getMap("customers");
+    }
+
+    ;
 }
