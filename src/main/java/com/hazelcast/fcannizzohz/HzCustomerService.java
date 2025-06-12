@@ -13,11 +13,19 @@ public class HzCustomerService
 
     @Override
     public Customer findCustomer(String id) {
-        return customerMap().get(id);
+        try {
+            return customerMap().get(id);
+        } catch (Exception e) {
+            throw new ServiceException("Find customer failed", e);
+        }
     }
 
     public void save(Customer customer) {
-        customerMap().put(customer.id(), customer);
+        try {
+            customerMap().put(customer.id(), customer);
+        } catch (Exception e) {
+            throw new ServiceException("Save customer failed", e);
+        }
     }
 
     private IMap<String, Customer> customerMap() {
