@@ -35,7 +35,10 @@ public class CustomerServiceComponentTest
 
         // Set up Hazelcast config with MapStore
         Config config = new Config();
-        config.getMapConfig("customers").getMapStoreConfig().setEnabled(true).setImplementation(new CustomerMapStore(conn));
+        config.getMapConfig("customers")
+              .getMapStoreConfig()
+              .setEnabled(true)
+              .setImplementation(new CustomerMapStore(conn));
 
         hz = createHazelcastInstance(config);
         CustomerService service = new HzCustomerService(hz);
