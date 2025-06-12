@@ -27,8 +27,7 @@ import static org.mockito.Mockito.when;
  * </ul>
  * </p>
  */
-public class CustomerServiceComponentTest
-        extends HazelcastTestSupport {
+public class CustomerServiceComponentTest extends HazelcastTestSupport {
 
     private HazelcastInstance hz;
 

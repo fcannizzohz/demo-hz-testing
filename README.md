@@ -41,6 +41,15 @@ running fully fledged instances started with `Hazelcast.newHazelcastInstance()`.
 The latter creates full Hazelcast nodes and may interfere with local networking (e.g., TCP/IP stack, port conflicts), making 
 tests slower and possibly more brittle.
 
+The advantage of testing with the **mock network** over running with Hazelcast instances running with a full network stack is 
+speed of test execution. 
+
+To run the tests with the full network stack the system property `hazelcast.test.use.network` must be set to `true`:
+
+   `$> mvn test -Dhazelcast.test.use.network=true`
+
+In this case, the tests will run considerably slower that if they were executed with the mock network with `$> mvn test`
+
 ### Setting up the Hazelcast Test support
 
 The `HazelcastTestSupport` requires following dependency with the `tests` classifier:
