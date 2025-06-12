@@ -3,6 +3,7 @@ package com.hazelcast.fcannizzohz;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.MapStore;
+import com.hazelcast.sql.HazelcastSqlException;
 import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.After;
 import org.junit.Test;
@@ -69,7 +70,8 @@ public class CustomerServiceComponentTest
 
         // Create a mock MapStore that throws an exception when load is called
         MapStore<String, Customer> failingMapStore = (MapStore<String, Customer>) mock(MapStore.class);
-        when(failingMapStore.load("c1")).thenThrow(new RuntimeException("Injected failure"));
+        when(failingMapStore.load("c1"))
+                .thenThrow(new HazelcastSqlException("Injected failure", new RuntimeException("downstream error")));
 
         // Configure Hazelcast with the failing MapStore
         Config config = new Config();
