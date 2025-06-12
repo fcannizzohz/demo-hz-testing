@@ -14,14 +14,14 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
 /**
  * <p>
  * Why This is a Component Test:
  * <ul>
- *  <li>Involves the component under test and its private dependencies (CustomerService, CustomerMapStore via Hazelcast)</li>
+ *  <li>Involves the component under test (HzCustomerService) and its private dependencies (SQLCustomerMapStore via Hazelcast)</li>
  *  <li>Uses a real external dependency (H2) and real Hazelcast instance (not mocked)</li>
- *  <li>Does not require the rest of the system (e.g., REST layer, messaging, etc.)</li>
- *  <li>Tests distributed behaviour (eviction, reload) in a focused subsystem</li>
+ *  <li>Tests distributed behaviour: eviction, load and reload, failure of downstream dependencies</li>
  * </ul>
  * </p>
  */
@@ -35,57 +35,56 @@ public class CustomerServiceComponentTest
     @Test
     public void customerServiceWithMapStoreInteractions()
             throws Exception {
-        // Set up H2 in-memory DB
+        // Set up H2 in-memory database to simulate persistent backend
         Connection conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         conn.createStatement().execute(CREATE_TABLE_SQL);
 
-        // Set up Hazelcast config with MapStore
+        // Configure Hazelcast with MapStore implementation using the H2 connection
         Config config = new Config();
         config.setClusterName(randomName());
         // inject custom Map Store
         config.getMapConfig("customers").getMapStoreConfig().setEnabled(true).setImplementation(new SQLCustomerMapStore(conn));
 
-        // Create hz instance
+        // Start a real embedded Hazelcast instance
         hz = createHazelcastInstance(config);
 
+        // Use real CustomerService backed by Hazelcast
         CustomerService service = new HzCustomerService(hz);
 
-        // Act - save new customer
+        // Save customer (should persist to both IMap and DB)
         service.save(new Customer("c1", "Alice")); // should go into both IMap and DB
         Customer fromMap = service.findCustomer("c1");      // should be from IMap
 
-        // Clear IMap to test reloading from DB
+        // Evict IMap to force reload from MapStore (H2)
         hz.getMap("customers").evictAll();
         Customer fromStore = service.findCustomer("c1");    // should be reloaded from H2
 
-        // Assert
+        // Verify both fetches return the same persisted data
         assertEquals("Alice", fromMap.name());
         assertEquals("Alice", fromStore.name());
     }
 
     @Test
-    public void customerServiceWithMapStoreFailure()
-            throws Exception {
+    public void customerServiceWithMapStoreFailure() {
 
-        // mock MapStore to inject failure
+        // Create a mock MapStore that throws an exception when load is called
         MapStore<String, Customer> failingMapStore = (MapStore<String, Customer>) mock(MapStore.class);
         when(failingMapStore.load("c1")).thenThrow(new RuntimeException("Injected failure"));
 
-        // Set up Hazelcast config with MapStore
+        // Configure Hazelcast with the failing MapStore
         Config config = new Config();
         config.setClusterName(randomName());
-        // inject custom Map Store
         config.getMapConfig("customers")
               .getMapStoreConfig()
               .setEnabled(true)
               .setImplementation(failingMapStore);
 
-        // Create hz instance
         hz = createHazelcastInstance(config);
-
         CustomerService service = new HzCustomerService(hz);
+
+        // Assert that the service wraps the exception in a ServiceException
         ServiceException ex = assertThrows(ServiceException.class, () -> {
-            // Act - expected injected failure from MapStore
+            // Action that triggers failure
             service.findCustomer("c1");
         });
 
