@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -71,7 +72,7 @@ public class CustomerServiceComponentTest
         // Create a mock MapStore that throws an exception when load is called
         MapStore<String, Customer> failingMapStore = (MapStore<String, Customer>) mock(MapStore.class);
         when(failingMapStore.load("c1"))
-                .thenThrow(new HazelcastSqlException("Injected failure", new RuntimeException("downstream error")));
+                .thenThrow(new HazelcastSqlException("Injected failure", new SQLException("downstream DB error")));
 
         // Configure Hazelcast with the failing MapStore
         Config config = new Config();
