@@ -74,7 +74,7 @@ By default the "mock" network is used, hence the instances spin up much faster b
 The same tests can be executed with the full network stack by setting the system property `-Dhazelcast.test.use.network=true`.
 
 ### Creating Clients
-The same factory can produce client instances that automatically discover and connect to your mock cluster:
+The `TestHazelcastFactory` (an extension of `TestHazelcastinstanceFactory`) can produce client instances that automatically discover and connect to your mock cluster:
 
 ```java
 TestHazelcastFactory factory = createHazelcastFactory(2);
