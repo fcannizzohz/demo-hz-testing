@@ -30,7 +30,7 @@ Add the tests classifier to your Hazelcast dependency to pull in the testing sup
 ### Extend the Support Class
    
 Have your test class extend `com.hazelcast.test.HazelcastTestSupport`. 
-This base class bundles convenient factory methods, assertions, and lifecycle hooks.
+This base class bundles convenient factory methods and assertions.
 
 ```java
 @RunWith(HazelcastParallelClassRunner.class)
@@ -69,6 +69,9 @@ config.setProperty("hazelcast.some.property", "value");
 TestHazelcastInstanceFactory factory = createHazelcastInstanceFactory(2);
 HazelcastInstance[] members = factory.newInstances(config, 2);
 ```
+
+By default the "mock" network is used, hence the instances spin up much faster because the network stack is skipped.
+The same tests can be executed with the full network stack by setting the system property `-Dhazelcast.test.use.network=true`.
 
 ### Creating Clients
 The same factory can produce client instances that automatically discover and connect to your mock cluster:
