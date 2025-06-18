@@ -1,6 +1,8 @@
-package com.hazelcast.fcannizzohz;
+package com.hazelcast.fcannizzohz.junit4;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.fcannizzohz.Customer;
+import com.hazelcast.fcannizzohz.HzCustomerService;
 import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.After;
 import org.junit.Test;

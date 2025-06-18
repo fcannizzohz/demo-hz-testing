@@ -36,8 +36,10 @@ An example of mocking Hazelcast interfaces is:
 While not mocking per se, **embedded Hazelcast instances** are real, in-memory cluster nodes ideal for local testing. 
 They enable realistic behaviour without requiring external setup.
 
-Unless for specific reasons regarding testing of network deployments developers should use, `HazelcastTestSupport` over
-running fully fledged instances started with `Hazelcast.newHazelcastInstance()`.
+Unless for specific reasons regarding testing of network deployments developers should use, `HazelcastTestSupport.class` 
+(or `JetTestSupport.class` for streaming) or `TestHazelcastInstanceFactory.class` over running fully fledged instances started 
+with `Hazelcast.newHazelcastInstance()`.
+
 The latter creates full Hazelcast nodes and may interfere with local networking (e.g., TCP/IP stack, port conflicts), making 
 tests slower and possibly more brittle.
 
@@ -49,6 +51,9 @@ To run the tests with the full network stack the system property `hazelcast.test
    `$> mvn test -Dhazelcast.test.use.network=true`
 
 In this case, the tests will run considerably slower that if they were executed with the mock network with `$> mvn test`
+
+### Differences between the vairous options
+
 
 ### Setting up the Hazelcast Test support
 
