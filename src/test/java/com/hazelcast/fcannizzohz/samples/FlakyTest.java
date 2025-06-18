@@ -3,18 +3,17 @@ package com.hazelcast.fcannizzohz.samples;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.test.HazelcastTestSupport;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import com.hazelcast.test.HazelcastSerialClassRunner;
 import com.hazelcast.test.annotation.Repeat;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(HazelcastSerialClassRunner.class)
@@ -40,15 +39,19 @@ public class FlakyTest extends HazelcastTestSupport {
     @Test
     public void testFlakyBehavior() {
 
-        IMap<String, String> map = member1.getMap("flakyMap");
+        IMap<String, Integer> map = member1.getMap("map");
+
         // simulate intermittent behavior: succeed only half the time
         if (System.currentTimeMillis() % 2 == 0) {
-            map.put("key", "value");
-            counter.incrementAndGet();
+            map.put("key", counter.incrementAndGet());
         }
 
-        System.out.println("> " + run.incrementAndGet() + " " + counter.get());
+        System.out.println("> run=" + run.incrementAndGet() + ", value=" + map.get("key"));
+
         // then: assert that the map put worked only half of the time
-        assertTrue("Counter should have been less than 5: value=" + counter.get(), counter.get() < 5);
+        Integer v = map.get("key");
+        // since this test is repeated 5 times, it'll always pass in this example but
+        // in reality, at some point the real flaky test will fail
+        assertTrue("Map value should be less than 5: value=" + v, v < 5);
     }
 }
