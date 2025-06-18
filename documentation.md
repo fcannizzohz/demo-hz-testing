@@ -5,6 +5,10 @@
 This guide shows you how to write unit/integration/component, in-JVM tests for Hazelcast clusters and 
 clients using the `com.hazelcast.test.HazelcastTestSupport` base class for JUnit 4 tests, and the 
 `com.hazelcast.test.TestHazelcastInstanceFactory` for JUnit 5 (Jupiter)–style tests. 
+To create client instances, use `com.hazelcast.test.client.TestHazelcastFactory`; this class extends
+`com.hazelcast.test.TestHazelcastInstanceFactory` hence it can be used to manage both client and server
+instances.
+
 
 It covers creating mock clusters, injecting custom configurations, isolating tests, and cleaning up resources, 
 with code examples and best practices.
@@ -70,7 +74,7 @@ HazelcastInstance[] members = factory.newInstances(config, 2);
 The same factory can produce client instances that automatically discover and connect to your mock cluster:
 
 ```java
-TestHazelcastInstanceFactory factory = createHazelcastInstanceFactory(2);
+TestHazelcastFactory factory = createHazelcastFactory(2);
 HazelcastInstance[] members = factory.newInstances(2);
 HazelcastInstance client = factory.newHazelcastClient();
 // ... use client.getMap(...), etc. ...
@@ -81,7 +85,7 @@ To avoid cross-test interference when tests run in parallel, isolate each cluste
 
 ```java
 @Test
-public void given_isolatedClusters_when_parallelTests_then_noInterference() {
+public void isolatedClustersDontInterfere() {
    String clusterName = randomName();
    Config config = new Config().setClusterName(clusterName);
 
@@ -96,13 +100,12 @@ public void given_isolatedClusters_when_parallelTests_then_noInterference() {
 
 ### Cleaning Up Resources
 
-Mock instances created by `HazelcastTestSupport` are automatically shut down after each test. 
-If you create real instances via `Hazelcast.newHazelcastInstance()`, explicitly shut them down to avoid resource leaks:
+After each test, created resources should be cleaned:
 
 ```java
 @After
 public void tearDown() {
-Hazelcast.shutdownAll();
+    factory.shutdownAll();
 }
 ```
 
@@ -143,16 +146,26 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+
+import com.hazelcast.client.test.TestHazelcastFactory;
+import com.hazelcast.core.HazelcastInstance;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class MyJupiterClusterTest {
 
-    private static TestHazelcastInstanceFactory factory;
+    private static TestHazelcastFactory factory;
     private static HazelcastInstance member1;
     private static HazelcastInstance member2;
     private static HazelcastInstance client;
 
     @BeforeAll
     static void setupCluster() {
-        factory = new TestHazelcastInstanceFactory(2);
+        factory = new TestHazelcastFactory(2);
         member1 = factory.newHazelcastInstance();
         member2 = factory.newHazelcastInstance();
         client = factory.newHazelcastClient();
@@ -160,7 +173,7 @@ class MyJupiterClusterTest {
 
     @AfterAll
     static void tearDownCluster() {
-        Hazelcast.shutdownAll();
+        factory.shutdownAll();
     }
 
     @Test
@@ -169,6 +182,7 @@ class MyJupiterClusterTest {
         assertTrue(client.getCluster().getMembers().contains(member2.getCluster().getLocalMember()));
     }
 }
+
 ```
 You can also pass a Config or ClientConfig to the factory:
 
