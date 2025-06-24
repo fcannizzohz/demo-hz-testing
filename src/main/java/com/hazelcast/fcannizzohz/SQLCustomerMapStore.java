@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
-public class SQLCustomerMapStore implements MapStore<String, Customer> {
+public class SQLCustomerMapStore
+        implements MapStore<String, Customer> {
     private final Connection connection;
 
     public SQLCustomerMapStore(Connection connection) {

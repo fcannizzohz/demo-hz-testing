@@ -10,9 +10,7 @@ import com.hazelcast.jet.pipeline.StreamStage;
 public class OrderEnrichmentPipeline {
     public static Pipeline build(BatchSource<Order> source) {
         Pipeline p = Pipeline.create();
-        p.readFrom(source)
-         .mapUsingIMap("customers", Order::customerId, getEnrichment())
-         .writeTo(Sinks.list("enriched-orders"));
+        p.readFrom(source).mapUsingIMap("customers", Order::customerId, getEnrichment()).writeTo(Sinks.list("enriched-orders"));
         return p;
     }
 
@@ -26,8 +24,7 @@ public class OrderEnrichmentPipeline {
     }
 
     public static StreamStage<EnrichedOrder> enrich(Pipeline p, StreamSource<Order> source) {
-        return p.readFrom(source)
-                .withoutTimestamps() // or with timestamps if using event time
+        return p.readFrom(source).withoutTimestamps() // or with timestamps if using event time
                 .mapUsingIMap("customers", Order::customerId, getEnrichment());
     }
 }

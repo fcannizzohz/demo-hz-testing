@@ -1,27 +1,29 @@
 # Testing samples
 
-Testing applications that use Hazelcast (IMDG and Streaming) requires care to validate the behaviour at various levels - from 
+Testing applications that use Hazelcast (IMDG and Streaming) requires care to validate the behaviour at various levels - from
 unit to system tests - given Hazelcast’s distributed, eventually consistent and asynchronous behaviour.
 
 ## Mocking Hazelcast Interfaces
 
-Mocking Hazelcast APIs allows you to isolate the class under test and control its dependencies.  The advantages of this approach are:
+Mocking Hazelcast APIs allows you to isolate the class under test and control its dependencies. The advantages of this approach
+are:
 
- - **Isolation**: the test only focuses on testing the logic of the class under test
- - **Speed**: it may be faster to run as it doesn't need Hazelcast to run
- - **Control**: it's easier to setup edge cases (null, exceptions). For example `when(map.get("404")).thenReturn(null)`
+- **Isolation**: the test only focuses on testing the logic of the class under test
+- **Speed**: it may be faster to run as it doesn't need Hazelcast to run
+- **Control**: it's easier to setup edge cases (null, exceptions). For example `when(map.get("404")).thenReturn(null)`
 
-While useful, mocking Hazelcast interfaces should be done with care. It is considered an antipattern to mock external interfaces 
+While useful, mocking Hazelcast interfaces should be done with care. It is considered an antipattern to mock external interfaces
 (see paragraph 4.1 of [this paper](http://jmock.org/oopsla2004.pdf)), especially interfaces you don’t own, because:
 
- - Brittleness: Tests may break when Hazelcast changes its API or behaviour
- - Blind spots: It skips real Hazelcast behaviour such as:
-   - Serialization/deserialization
-   - Key/value validations
-   - TTLs, eviction policies
-   - Event listeners, interceptors
+- Brittleness: Tests may break when Hazelcast changes its API or behaviour
+- Blind spots: It skips real Hazelcast behaviour such as:
+    - Serialization/deserialization
+    - Key/value validations
+    - TTLs, eviction policies
+    - Event listeners, interceptors
 
 An example of mocking Hazelcast interfaces is:
+
 ```java
     @Test
     void testFindCustomerWithMock() {
@@ -33,27 +35,26 @@ An example of mocking Hazelcast interfaces is:
 
 ## Testing with embedded Hazelcast mock network
 
-While not mocking per se, **embedded Hazelcast instances** are real, in-memory cluster nodes ideal for local testing. 
+While not mocking per se, **embedded Hazelcast instances** are real, in-memory cluster nodes ideal for local testing.
 They enable realistic behaviour without requiring external setup.
 
-Unless for specific reasons regarding testing of network deployments developers should use, `HazelcastTestSupport.class` 
-(or `JetTestSupport.class` for streaming) or `TestHazelcastInstanceFactory.class` over running fully fledged instances started 
+Unless for specific reasons regarding testing of network deployments developers should use, `HazelcastTestSupport.class`
+(or `JetTestSupport.class` for streaming) or `TestHazelcastInstanceFactory.class` over running fully fledged instances started
 with `Hazelcast.newHazelcastInstance()`.
 
-The latter creates full Hazelcast nodes and may interfere with local networking (e.g., TCP/IP stack, port conflicts), making 
+The latter creates full Hazelcast nodes and may interfere with local networking (e.g., TCP/IP stack, port conflicts), making
 tests slower and possibly more brittle.
 
-The advantage of testing with the **mock network** over running with Hazelcast instances running with a full network stack is 
-speed of test execution. 
+The advantage of testing with the **mock network** over running with Hazelcast instances running with a full network stack is
+speed of test execution.
 
 To run the tests with the full network stack the system property `hazelcast.test.use.network` must be set to `true`:
 
-   `$> mvn test -Dhazelcast.test.use.network=true`
+`$> mvn test -Dhazelcast.test.use.network=true`
 
 In this case, the tests will run considerably slower that if they were executed with the mock network with `$> mvn test`
 
 ### Differences between the vairous options
-
 
 ### Setting up the Hazelcast Test support
 
@@ -67,6 +68,7 @@ The `HazelcastTestSupport` requires following dependency with the `tests` classi
       <classifier>tests</classifier>
     </dependency>
 ```
+
 as well as the use of JUnit 4 and OpenTest4J:
 
 ```xml
@@ -107,6 +109,7 @@ For example:
         assertEquals("Alice", sut.findCustomer("123").name());
     }
 ```
+
 or, with a multi node setup:
 
 ```java
@@ -125,7 +128,8 @@ or, with a multi node setup:
     }
 ```
 
-> **NOTE**: When creating instances with `createHazelcastInstances()` it's best practice to shutdown them at the end of each test to
+> **NOTE**: When creating instances with `createHazelcastInstances()` it's best practice to shutdown them at the end of each test
+> to
 > free up resources and prevent test brittleness:
 > ```java
 > @After
@@ -136,11 +140,12 @@ or, with a multi node setup:
 
 ### Testing complex test scenarios
 
-This approach allows testing realistic behaviour in a fast and controlled environment. 
+This approach allows testing realistic behaviour in a fast and controlled environment.
 
 #### Testing the integration of two services
 
-In the following example, two services (`Customer`and `Order` share state via Hazelcast.) Functionality can be tested as following:
+In the following example, two services (`Customer`and `Order` share state via Hazelcast.) Functionality can be tested as
+following:
 
 ```java
     @Test
@@ -202,7 +207,7 @@ Another typical scenario consist of testing the integration of a component, in i
 
 ### Testing integrated behaviour
 
-`HazelcastTestSupport` supports testing of the application using the Hazelcast capabilities, for example, in this case, the 
+`HazelcastTestSupport` supports testing of the application using the Hazelcast capabilities, for example, in this case, the
 execution of a listener:
 
 ```java
@@ -225,7 +230,7 @@ execution of a listener:
 
 ### Testing streaming applications
 
-Hazelcast releases also support for testing streaming applications. This is done extending `JetTestSupport` (itself an extension 
+Hazelcast releases also support for testing streaming applications. This is done extending `JetTestSupport` (itself an extension
 of `HazelcastTestSupport`). The [Hazelcast docs](https://docs.hazelcast.com/hazelcast/5.5/test/testing) provide further details.
 
 To use `JetTestSupport` the following dependencies must be included:
@@ -271,7 +276,7 @@ With `JetTestSupport` utility methods available, one can test distributed jobs l
     }
 ```
 
-The approach shown in the previous example doesn't work in cases where streams are never ending. 
+The approach shown in the previous example doesn't work in cases where streams are never ending.
 In this case, an approach based on a set of `assert*` utilities that can be injected in the pipeline is preferable.
 
 For example, here we inject a data source and assert on the number of received items in the output stream.

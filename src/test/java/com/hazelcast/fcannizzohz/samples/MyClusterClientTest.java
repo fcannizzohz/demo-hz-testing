@@ -3,7 +3,6 @@ package com.hazelcast.fcannizzohz.samples;
 import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
 import org.junit.jupiter.api.Test;
 
 import static com.hazelcast.test.HazelcastTestSupport.assertClusterSizeEventually;
@@ -11,8 +10,10 @@ import static com.hazelcast.test.HazelcastTestSupport.assertTrueEventually;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MyClusterClientTest {
+
     @Test
-    public void testClientPutAndGetAcrossCluster() throws Exception {
+    public void testClientPutAndGetAcrossCluster()
+            throws Exception {
         // given: a 2-node in-process cluster with client
         TestHazelcastFactory factory = new TestHazelcastFactory(2);
         HazelcastInstance member1 = factory.newHazelcastInstance();

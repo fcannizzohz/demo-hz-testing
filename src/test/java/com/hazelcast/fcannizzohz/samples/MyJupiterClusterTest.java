@@ -7,14 +7,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import static com.hazelcast.test.HazelcastTestSupport.assertClusterSize;
 import static com.hazelcast.test.HazelcastTestSupport.assertClusterSizeEventually;
-import static com.hazelcast.test.HazelcastTestSupport.assertEqualsEventually;
 import static com.hazelcast.test.HazelcastTestSupport.assertTrueEventually;
-import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,10 +34,12 @@ class MyJupiterClusterTest {
         factory.shutdownAll();
     }
 
-    @Test
-    void testClusterFormed() {
-        assertEquals(2, member1.getCluster().getMembers().size());
-        assertTrue(client.getCluster().getMembers().contains(member2.getCluster().getLocalMember()));
+    private static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);   // artificial delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Test
@@ -54,7 +51,14 @@ class MyJupiterClusterTest {
     }
 
     @Test
-    void testAsyncTasks() throws Exception {
+    void testClusterFormed() {
+        assertEquals(2, member1.getCluster().getMembers().size());
+        assertTrue(client.getCluster().getMembers().contains(member2.getCluster().getLocalMember()));
+    }
+
+    @Test
+    void testAsyncTasks()
+            throws Exception {
         Runnable task = () -> {
             IMap<Integer, String> map = member1.getMap("map");
             // your async logic here
@@ -69,14 +73,6 @@ class MyJupiterClusterTest {
         t.join();
         assertTrueEventually(() -> assertEquals(2, member2.getMap("map").size()));
         assertTrueEventually(() -> assertFalse(member2.getMap("map").containsKey("3")));
-    }
-
-    private static void sleep(int millis) {
-        try {
-            Thread.sleep(millis);   // artificial delay
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }
 

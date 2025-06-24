@@ -1,8 +1,8 @@
 package com.hazelcast.fcannizzohz.samples;
 
+import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.config.Config;
-import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.test.HazelcastParallelClassRunner;
@@ -13,6 +13,10 @@ import static com.hazelcast.test.HazelcastTestSupport.assertClusterSizeEventuall
 import static com.hazelcast.test.HazelcastTestSupport.assertEqualsEventually;
 import static com.hazelcast.test.HazelcastTestSupport.randomName;
 
+/**
+ * This test shows how I can run multiple tests in parallel and in isolation, by assigning random names to the
+ * cluster so each test doesn't interfere with the other.
+ */
 @RunWith(HazelcastParallelClassRunner.class)
 public class IsolatedClustersTest {
 

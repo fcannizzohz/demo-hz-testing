@@ -2,22 +2,23 @@ package com.hazelcast.fcannizzohz.samples;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+import com.hazelcast.test.HazelcastSerialClassRunner;
 import com.hazelcast.test.HazelcastTestSupport;
+import com.hazelcast.test.annotation.Repeat;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import com.hazelcast.test.HazelcastSerialClassRunner;
-import com.hazelcast.test.annotation.Repeat;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(HazelcastSerialClassRunner.class)
-public class FlakyTest extends HazelcastTestSupport {
+public class FlakyTest
+        extends HazelcastTestSupport {
 
     private static final AtomicInteger run = new AtomicInteger();
     private static final AtomicInteger counter = new AtomicInteger();
@@ -30,16 +31,18 @@ public class FlakyTest extends HazelcastTestSupport {
 
     @After
     public void tearDown() {
-        if(member1 != null) {
+        if (member1 != null) {
             member1.shutdown();
         }
     }
 
     @Repeat(5)
+    @Ignore
     @Test
     public void testFlakyBehavior() {
 
         IMap<String, Integer> map = member1.getMap("map");
+        map.put("key", 0);
 
         // simulate intermittent behavior: succeed only half the time
         if (System.currentTimeMillis() % 2 == 0) {
@@ -50,8 +53,9 @@ public class FlakyTest extends HazelcastTestSupport {
 
         // then: assert that the map put worked only half of the time
         Integer v = map.get("key");
-        // since this test is repeated 5 times, it'll always pass in this example but
-        // in reality, at some point the real flaky test will fail
-        assertTrue("Map value should be less than 5: value=" + v, v < 5);
+        assertNotNull("Map should have a value", v);
+        // since this test is repeated 5 times, the value of the counter should be 5
+        // in reality, since this is a flaky test, it'll fail with a value less than 5.
+        assertTrue("Map value should be less than 5: value=" + v, v == 5);
     }
 }
