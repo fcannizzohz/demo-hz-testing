@@ -17,8 +17,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(HazelcastSerialClassRunner.class)
-public class FlakyTest
-        extends HazelcastTestSupport {
+public class FlakyTest extends HazelcastTestSupport {
 
     private static final AtomicInteger run = new AtomicInteger();
     private static final AtomicInteger counter = new AtomicInteger();
@@ -56,6 +55,6 @@ public class FlakyTest
         assertNotNull("Map should have a value", v);
         // since this test is repeated 5 times, the value of the counter should be 5
         // in reality, since this is a flaky test, it'll fail with a value less than 5.
-        assertTrue("Map value should be less than 5: value=" + v, v == 5);
+        assertTrue("Map increments should match number of runs", v == run.get());
     }
 }
