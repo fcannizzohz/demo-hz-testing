@@ -46,6 +46,10 @@ class MyJupiterClusterTest {
     void testClusterSizeEventually() {
         assertClusterSizeEventually(2, member1);
         assertClusterSizeEventually(2, member2);
+    }
+
+    @Test
+    void testClusterSize() {
         assertClusterSize(2, member1);
         assertClusterSize(2, member2);
     }
