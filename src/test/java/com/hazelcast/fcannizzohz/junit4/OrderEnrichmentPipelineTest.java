@@ -1,6 +1,7 @@
 package com.hazelcast.fcannizzohz.junit4;
 
 import com.hazelcast.collection.IList;
+import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.fcannizzohz.Customer;
 import com.hazelcast.fcannizzohz.EnrichedOrder;
@@ -8,6 +9,7 @@ import com.hazelcast.fcannizzohz.Order;
 import com.hazelcast.fcannizzohz.OrderEnrichmentPipeline;
 import com.hazelcast.jet.JetService;
 import com.hazelcast.jet.Job;
+import com.hazelcast.jet.config.JetConfig;
 import com.hazelcast.jet.core.JetTestSupport;
 import com.hazelcast.jet.pipeline.BatchSource;
 import com.hazelcast.jet.pipeline.Pipeline;
@@ -32,7 +34,10 @@ public class OrderEnrichmentPipelineTest
 
     @Before
     public void setup() {
-        instance = createHazelcastInstance();
+        Config config = new Config();
+        config.setJetConfig(new JetConfig().setEnabled(true));
+
+        instance = createHazelcastInstance(config);
     }
 
     @After

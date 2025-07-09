@@ -1,6 +1,7 @@
 package com.hazelcast.fcannizzohz.junit5;
 
 import com.hazelcast.collection.IList;
+import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.fcannizzohz.Customer;
 import com.hazelcast.fcannizzohz.EnrichedOrder;
@@ -8,6 +9,7 @@ import com.hazelcast.fcannizzohz.Order;
 import com.hazelcast.fcannizzohz.OrderEnrichmentPipeline;
 import com.hazelcast.jet.JetService;
 import com.hazelcast.jet.Job;
+import com.hazelcast.jet.config.JetConfig;
 import com.hazelcast.jet.pipeline.BatchSource;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.StreamSource;
@@ -29,10 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class OrderEnrichmentPipelineTest {
 
     private TestHazelcastInstanceFactory factory;
+    private Config config;
 
     @BeforeEach
     public void setUp() {
         factory = new TestHazelcastInstanceFactory();
+        config = new Config();
+        config.setJetConfig(new JetConfig().setEnabled(true));
+
     }
 
     @AfterEach
@@ -44,7 +50,7 @@ public class OrderEnrichmentPipelineTest {
 
     @Test
     public void testJetOrderEnrichmentWithHazelcastState() {
-        HazelcastInstance instance = factory.newHazelcastInstance();
+        HazelcastInstance instance = factory.newHazelcastInstance(config);
         JetService jet = instance.getJet();
 
         IMap<String, Customer> customerMap = instance.getMap("customers");
@@ -64,7 +70,7 @@ public class OrderEnrichmentPipelineTest {
 
     @Test
     public void streamingEnrichmentWithInlineAssertion() {
-        HazelcastInstance instance = factory.newHazelcastInstance();
+        HazelcastInstance instance = factory.newHazelcastInstance(config);
         IMap<String, Customer> customerMap = instance.getMap("customers");
         customerMap.put("c1", new Customer("c1", "Alice"));
         customerMap.put("c2", new Customer("c2", "Bob"));
