@@ -31,6 +31,8 @@ public class MyPipelineTest extends JetTestSupport {
 
         IList<Integer> result = instance.getList("out");
         assertEquals(3, result.size());
+
+        instance.shutdown();
     }
 
 }

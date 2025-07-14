@@ -12,7 +12,7 @@ import static org.mockito.Mockito.*;
 public class MyMapListenerTest extends HazelcastTestSupport {
 
     @Test
-    public void testUpdateTriggersListener() {
+    public void updateTriggersListener() {
         // create Hazelcast member
         HazelcastInstance instance = createHazelcastInstance();
 
@@ -29,5 +29,7 @@ public class MyMapListenerTest extends HazelcastTestSupport {
 
         // verify the listener received the update
         verify(mockListener, timeout(1000).times(1)).entryUpdated(any(EntryEvent.class));
+
+        instance.shutdown();
     }
 }

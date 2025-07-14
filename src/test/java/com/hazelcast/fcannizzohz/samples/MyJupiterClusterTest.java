@@ -16,14 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MyJupiterClusterTest {
 
-    private static TestHazelcastFactory factory;
     private static HazelcastInstance member1;
     private static HazelcastInstance member2;
     private static HazelcastInstance client;
 
     @BeforeAll
     static void setupCluster() {
-        factory = new TestHazelcastFactory(2);
+        TestHazelcastFactory factory = new TestHazelcastFactory(2);
         member1 = factory.newHazelcastInstance();
         member2 = factory.newHazelcastInstance();
         client = factory.newHazelcastClient();
@@ -31,7 +30,9 @@ class MyJupiterClusterTest {
 
     @AfterAll
     static void tearDownCluster() {
-        factory.shutdownAll();
+        client.shutdown();
+        member1.shutdown();
+        member2.shutdown();
     }
 
     private static void sleep(int millis) {

@@ -66,7 +66,6 @@ class MyMapStoreTest {
 
     @Test
     void testAsyncStoreIsInvoked() {
-        @SuppressWarnings("unchecked")
         MapStore<String, String> mockMapStore = mock(MapStore.class);
 
         // Configure and start another instance for the store test

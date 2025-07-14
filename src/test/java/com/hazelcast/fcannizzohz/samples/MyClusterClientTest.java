@@ -30,6 +30,10 @@ public class MyClusterClientTest {
         assertClusterSizeEventually(2, member1);
         assertTrueEventually(() -> assertEquals("value0", clientMap.get("key0")));
         assertTrueEventually(() -> assertEquals("value1", clientMap.get("key1")));
+
+        client.shutdown();
+        member1.shutdown();
+        member2.shutdown();
     }
 
 }

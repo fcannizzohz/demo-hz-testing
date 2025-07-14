@@ -13,6 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static com.hazelcast.test.HazelcastTestSupport.assertClusterSizeEventually;
+import static com.hazelcast.test.HazelcastTestSupport.assertEqualsEventually;
+
 /**
  * This test shows how I can run multiple tests in parallel and in isolation, to test
  * business logic on Hazelcast data structures.
@@ -20,21 +23,19 @@ import org.junit.runner.RunWith;
  * Isolation can be achieved by by assigning random names to the
  * cluster so each test doesn't interfere with the other.
  */
-//@RunWith(HazelcastParallelClassRunner.class)
-public class IsolatedClustersTest extends HazelcastTestSupport {
+@RunWith(HazelcastParallelClassRunner.class)
+public class IsolatedClustersTest {
 
     private HazelcastInstance[] members;
     private HazelcastInstance client;
-    private ClientConfig clientConfig;
-    private TestHazelcastFactory factory;
 
     @Before
     public void setUp() {
-        String clusterName = randomName();
+        String clusterName = HazelcastTestSupport.randomName();
         Config serverConfig = new Config().setClusterName(clusterName);
-        clientConfig = new ClientConfig().setClusterName(clusterName);
+        ClientConfig clientConfig = new ClientConfig().setClusterName(clusterName);
 
-        factory = new TestHazelcastFactory(2);
+        TestHazelcastFactory factory = new TestHazelcastFactory(2);
         members = factory.newInstances(serverConfig, 2);
         client = factory.newHazelcastClient(clientConfig);
     }

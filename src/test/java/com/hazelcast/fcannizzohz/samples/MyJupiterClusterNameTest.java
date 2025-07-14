@@ -29,7 +29,8 @@ class MyJupiterClusterNameTest {
 
     @AfterAll
     static void tearDownCluster() {
-        factory.shutdownAll();
+        member2.shutdown();
+        member1.shutdown();
     }
 
     @Test
