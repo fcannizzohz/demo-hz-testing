@@ -1,5 +1,6 @@
 package com.hazelcast.fcannizzohz.junit5;
 
+import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.collection.IList;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
@@ -17,7 +18,6 @@ import com.hazelcast.jet.pipeline.test.AssertionCompletedException;
 import com.hazelcast.jet.pipeline.test.Assertions;
 import com.hazelcast.jet.pipeline.test.TestSources;
 import com.hazelcast.map.IMap;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,12 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrderEnrichmentPipelineTest {
 
-    private TestHazelcastInstanceFactory factory;
+    private TestHazelcastFactory factory;
     private Config config;
 
     @BeforeEach
     public void setUp() {
-        factory = new TestHazelcastInstanceFactory();
+        factory = new TestHazelcastFactory();
         config = new Config();
         config.setJetConfig(new JetConfig().setEnabled(true));
 

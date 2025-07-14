@@ -1,11 +1,13 @@
 package com.hazelcast.fcannizzohz.samples;
 
+import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.test.HazelcastParallelClassRunner;
 import com.hazelcast.test.HazelcastTestSupport;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,8 +18,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(HazelcastParallelClassRunner.class)
-public class MyClusterTest
-        extends HazelcastTestSupport {
+public class MyClusterTest extends HazelcastTestSupport {
 
     // Atomic timestamps to verify overlapping execution
     private static final AtomicLong test1Start = new AtomicLong();
@@ -46,14 +47,18 @@ public class MyClusterTest
     @Test
     public void testMapPutAndGetAcrossCluster()
             throws Exception {
+
+        Config config = new Config();
+        config.setClusterName(randomName());
+        // given: a 2-node in-process cluster
+        HazelcastInstance[] instances = createHazelcastInstances(config, 2);
+        HazelcastInstance member1 = instances[0];
+        HazelcastInstance member2 = instances[1];
+
         test1Start.set(System.currentTimeMillis());
         // simulate workload
         Thread.sleep(100);
 
-        // given: a 2-node in-process cluster
-        TestHazelcastInstanceFactory factory = createHazelcastInstanceFactory(2);
-        HazelcastInstance member1 = factory.newHazelcastInstance();
-        HazelcastInstance member2 = factory.newHazelcastInstance();
 
         // when: put an entry on member1
         IMap<String, String> mapOnMember1 = member1.getMap("testMap");
@@ -65,19 +70,26 @@ public class MyClusterTest
         assertEquals("world", mapOnMember2.get("hello"));
 
         test1End.set(System.currentTimeMillis());
+
+        for (HazelcastInstance instance : instances) {
+            instance.shutdown();
+        }
     }
 
     @Test
     public void testMapRemoveAcrossCluster()
             throws Exception {
+
+        Config config = new Config();
+        config.setClusterName(randomName());
+        // given: a 2-node in-process cluster
+        HazelcastInstance[] instances = createHazelcastInstances(config, 2);
+        HazelcastInstance member1 = instances[0];
+        HazelcastInstance member2 = instances[1];
+
         test2Start.set(System.currentTimeMillis());
         // simulate workload
         Thread.sleep(100);
-
-        // given: a 2-node in-process cluster
-        TestHazelcastInstanceFactory factory = createHazelcastInstanceFactory(2);
-        HazelcastInstance member1 = factory.newHazelcastInstance();
-        HazelcastInstance member2 = factory.newHazelcastInstance();
 
         // when: put and then remove an entry on member1
         IMap<String, String> mapOnMember1 = member1.getMap("testMap");
@@ -90,5 +102,10 @@ public class MyClusterTest
         assertTrueEventually(() -> assertNull(mapOnMember2.get("tempKey")));
 
         test2End.set(System.currentTimeMillis());
+
+        for (HazelcastInstance instance : instances) {
+            instance.shutdown();
+        }
+
     }
 }

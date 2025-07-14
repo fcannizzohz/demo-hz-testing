@@ -9,7 +9,7 @@ import com.hazelcast.fcannizzohz.SQLCustomerMapStore;
 import com.hazelcast.fcannizzohz.ServiceException;
 import com.hazelcast.map.MapStore;
 import com.hazelcast.sql.HazelcastSqlException;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
+import com.hazelcast.client.test.TestHazelcastFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,16 +38,28 @@ public class CustomerServiceComponentTest {
 
     private static final String CREATE_TABLE_SQL = "CREATE TABLE IF NOT EXISTS customers (id VARCHAR PRIMARY KEY, name VARCHAR)";
     private static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS customers";
-    private TestHazelcastInstanceFactory factory;
+    private TestHazelcastFactory factory;
     private Connection conn;
 
     @BeforeEach
     void setup()
             throws SQLException {
-        factory = new TestHazelcastInstanceFactory();
+        factory = new TestHazelcastFactory();
         conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-        conn.createStatement().execute(DROP_TABLE_SQL);
         conn.createStatement().execute(CREATE_TABLE_SQL);
+    }
+
+    @AfterEach
+    public void teardown()
+            throws SQLException {
+        if (conn != null) {
+            conn.createStatement().execute(DROP_TABLE_SQL);
+            conn.close();
+        }
+        if (factory != null) {
+            factory.shutdownAll();
+        }
+
     }
 
     @Test
@@ -102,12 +114,5 @@ public class CustomerServiceComponentTest {
 
         assertEquals("Find customer failed", ex.getMessage());
         assertEquals("Injected failure", ex.getCause().getMessage());
-    }
-
-    @AfterEach
-    public void tearDown() {
-        if (factory != null) {
-            factory.shutdownAll();
-        }
     }
 }

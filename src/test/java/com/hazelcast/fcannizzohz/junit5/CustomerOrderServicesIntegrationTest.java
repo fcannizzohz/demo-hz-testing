@@ -7,7 +7,7 @@ import com.hazelcast.fcannizzohz.HzCustomerService;
 import com.hazelcast.fcannizzohz.HzOrderService;
 import com.hazelcast.fcannizzohz.Order;
 import com.hazelcast.fcannizzohz.OrderService;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
+import com.hazelcast.client.test.TestHazelcastFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomerOrderServicesIntegrationTest {
 
-    private TestHazelcastInstanceFactory factory;
+    private TestHazelcastFactory factory;
 
     @BeforeEach
     public void setUp() {
-        factory = new TestHazelcastInstanceFactory();
+        factory = new TestHazelcastFactory();
     }
 
     @AfterEach

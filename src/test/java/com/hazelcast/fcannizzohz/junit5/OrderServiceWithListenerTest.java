@@ -5,7 +5,7 @@ import com.hazelcast.fcannizzohz.Customer;
 import com.hazelcast.fcannizzohz.HzOrderService;
 import com.hazelcast.fcannizzohz.Order;
 import com.hazelcast.fcannizzohz.OrderService;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
+import com.hazelcast.client.test.TestHazelcastFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,11 +19,11 @@ import static org.mockito.Mockito.verify;
 
 public class OrderServiceWithListenerTest {
 
-    private TestHazelcastInstanceFactory factory;
+    private TestHazelcastFactory factory;
 
     @BeforeEach
     public void setup() {
-        factory = new TestHazelcastInstanceFactory();
+        factory = new TestHazelcastFactory();
     }
 
     @AfterEach

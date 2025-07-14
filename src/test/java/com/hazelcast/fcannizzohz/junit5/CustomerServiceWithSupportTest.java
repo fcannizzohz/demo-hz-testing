@@ -1,10 +1,10 @@
 package com.hazelcast.fcannizzohz.junit5;
 
+import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.fcannizzohz.Customer;
 import com.hazelcast.fcannizzohz.HzCustomerService;
-import com.hazelcast.test.TestHazelcastInstanceFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,11 +13,11 @@ import static com.hazelcast.test.HazelcastTestSupport.randomName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomerServiceWithSupportTest {
-    private TestHazelcastInstanceFactory factory;
+    private TestHazelcastFactory factory;
 
     @BeforeEach
     void setup() {
-        factory = new TestHazelcastInstanceFactory();
+        factory = new TestHazelcastFactory();
     }
 
     @AfterEach

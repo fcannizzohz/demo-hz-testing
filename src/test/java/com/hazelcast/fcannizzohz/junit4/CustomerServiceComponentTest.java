@@ -11,13 +11,16 @@ import com.hazelcast.map.MapStore;
 import com.hazelcast.sql.HazelcastSqlException;
 import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,25 +34,44 @@ import static org.mockito.Mockito.when;
  * </ul>
  * </p>
  */
-public class CustomerServiceComponentTest
-        extends HazelcastTestSupport {
+public class CustomerServiceComponentTest extends HazelcastTestSupport {
 
     private static final String CREATE_TABLE_SQL = "CREATE TABLE customers (id VARCHAR PRIMARY KEY, name VARCHAR)";
+    private static final String DROP_TABLE_SQL = "DROP TABLE customers";
     private HazelcastInstance hz;
+    private Connection conn;
 
-    @Test
-    public void customerServiceWithMapStoreInteractions()
+    @Before
+    public void setUp()
             throws Exception {
         // Set up H2 in-memory database to simulate persistent backend
-        Connection conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        conn = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         conn.createStatement().execute(CREATE_TABLE_SQL);
+    }
+
+    @After
+    public void tearDown()
+            throws Exception {
+        if (conn != null) {
+            conn.createStatement().execute(DROP_TABLE_SQL);
+        }
+        if (hz != null) {
+            hz.shutdown();
+        }
+    }
+
+    @Test
+    public void customerServiceWithMapStoreInteractions() {
 
         // Configure Hazelcast with MapStore implementation using the H2 connection
         Config config = new Config();
         config.setClusterName(randomName());
         // inject custom Map Store
-        config.getMapConfig("customers").getMapStoreConfig().setEnabled(true).setImplementation(new SQLCustomerMapStore(conn));
-
+        config.getMapConfig("customers")
+              .getMapStoreConfig()
+              .setEnabled(true)
+              .setImplementation(new SQLCustomerMapStore(conn));
+        assertNotNull(conn);
         // Start a real embedded Hazelcast instance
         hz = createHazelcastInstance(config);
 
@@ -93,12 +115,5 @@ public class CustomerServiceComponentTest
 
         assertEquals("Find customer failed", ex.getMessage());
         assertEquals("Injected failure", ex.getCause().getMessage());
-    }
-
-    @After
-    public void tearDown() {
-        if (hz != null) {
-            hz.shutdown();
-        }
     }
 }
