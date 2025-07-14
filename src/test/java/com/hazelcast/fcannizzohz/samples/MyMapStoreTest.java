@@ -5,10 +5,16 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.map.MapStore;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class MyMapStoreTest {
 
@@ -20,18 +26,14 @@ class MyMapStoreTest {
         factory = new TestHazelcastFactory();
 
         // Create a mock MapStore that throws on load
-        @SuppressWarnings("unchecked")
-        MapStore<String, String> mockMapStore = mock(MapStore.class);
+        @SuppressWarnings("unchecked") MapStore<String, String> mockMapStore = mock(MapStore.class);
         when(mockMapStore.load("fail")).thenThrow(new RuntimeException("Simulated failure"));
         when(mockMapStore.load("key1")).thenReturn("value1");
 
         // Configure Hazelcast to use the mock MapStore
         Config config = new Config();
         config.setClusterName("mock-mapstore-test");
-        config.getMapConfig("testMap")
-              .getMapStoreConfig()
-              .setEnabled(true)
-              .setImplementation(mockMapStore);
+        config.getMapConfig("testMap").getMapStoreConfig().setEnabled(true).setImplementation(mockMapStore);
 
         hz = factory.newHazelcastInstance(config);
     }
@@ -55,7 +57,7 @@ class MyMapStoreTest {
 
     @Test
     void testLoadFailureHandled() {
-        IMap<String, String> map  = hz.getMap("testMap");
+        IMap<String, String> map = hz.getMap("testMap");
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             map.get("fail"); // triggers MapStore.load("fail")
@@ -70,9 +72,7 @@ class MyMapStoreTest {
 
         // Configure and start another instance for the store test
         Config config = new Config().setClusterName("store-test");
-        config.getMapConfig("storeMap")
-              .getMapStoreConfig()
-              .setEnabled(true)
+        config.getMapConfig("storeMap").getMapStoreConfig().setEnabled(true)
               .setWriteDelaySeconds(1) // async write to MapStore after 1s
               .setImplementation(mockMapStore);
 

@@ -1,5 +1,6 @@
 package com.hazelcast.fcannizzohz.junit5;
 
+import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.fcannizzohz.Customer;
 import com.hazelcast.fcannizzohz.CustomerService;
@@ -7,7 +8,6 @@ import com.hazelcast.fcannizzohz.HzCustomerService;
 import com.hazelcast.fcannizzohz.HzOrderService;
 import com.hazelcast.fcannizzohz.Order;
 import com.hazelcast.fcannizzohz.OrderService;
-import com.hazelcast.client.test.TestHazelcastFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

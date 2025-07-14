@@ -1,16 +1,15 @@
 package com.hazelcast.fcannizzohz.samples;
 
+import com.hazelcast.client.test.TestHazelcastFactory;
+import com.hazelcast.collection.IList;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.jet.JetService;
 import com.hazelcast.jet.config.JetConfig;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
-import com.hazelcast.client.test.TestHazelcastFactory;
-import com.hazelcast.collection.IList;
 import com.hazelcast.jet.pipeline.test.TestSources;
 import com.hazelcast.map.IMap;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,8 +27,7 @@ class MyPipeline5Test {
         JetService jet = instance.getJet();
 
         Pipeline p = Pipeline.create();
-        p.readFrom(TestSources.items(1, 2, 3))
-         .writeTo(Sinks.list("out"));
+        p.readFrom(TestSources.items(1, 2, 3)).writeTo(Sinks.list("out"));
 
         jet.newJob(p).join();
 
@@ -56,8 +54,7 @@ class MyPipeline5Test {
         // Build and run the pipeline
         Pipeline p = Pipeline.create();
         p.readFrom(TestSources.items("c1", "c2"))
-         .mapUsingIMap("customers", id -> id, (id, customer) -> ((Customer) customer).name())
-         .writeTo(Sinks.list("enriched"));
+         .mapUsingIMap("customers", id -> id, (id, customer) -> ((Customer) customer).name()).writeTo(Sinks.list("enriched"));
         jet.newJob(p).join();
 
         // Validate the result
@@ -69,6 +66,7 @@ class MyPipeline5Test {
         factory.shutdownAll();
     }
 
-    record Customer(String id, String name) {}
+    record Customer(String id, String name) {
+    }
 
 }

@@ -16,7 +16,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(HazelcastParallelClassRunner.class)
-public class MyClusterTest extends HazelcastTestSupport {
+public class MyClusterTest
+        extends HazelcastTestSupport {
 
     // Atomic timestamps to verify overlapping execution
     private static final AtomicLong test1Start = new AtomicLong();
@@ -56,7 +57,6 @@ public class MyClusterTest extends HazelcastTestSupport {
         test1Start.set(System.currentTimeMillis());
         // simulate workload
         Thread.sleep(100);
-
 
         // when: put an entry on member1
         IMap<String, String> mapOnMember1 = member1.getMap("testMap");

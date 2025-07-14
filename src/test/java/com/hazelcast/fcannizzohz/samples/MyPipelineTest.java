@@ -13,7 +13,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class MyPipelineTest extends JetTestSupport {
+public class MyPipelineTest
+        extends JetTestSupport {
 
     @Test
     public void testSimplePipeline() {
@@ -24,8 +25,7 @@ public class MyPipelineTest extends JetTestSupport {
         JetService jet = instance.getJet();
 
         Pipeline p = Pipeline.create();
-        p.readFrom(TestSources.items(1, 2, 3))
-         .writeTo(Sinks.list("out"));
+        p.readFrom(TestSources.items(1, 2, 3)).writeTo(Sinks.list("out"));
 
         jet.newJob(p).join();
 

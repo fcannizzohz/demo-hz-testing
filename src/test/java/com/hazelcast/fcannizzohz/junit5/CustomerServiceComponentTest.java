@@ -1,5 +1,6 @@
 package com.hazelcast.fcannizzohz.junit5;
 
+import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.fcannizzohz.Customer;
@@ -9,7 +10,6 @@ import com.hazelcast.fcannizzohz.SQLCustomerMapStore;
 import com.hazelcast.fcannizzohz.ServiceException;
 import com.hazelcast.map.MapStore;
 import com.hazelcast.sql.HazelcastSqlException;
-import com.hazelcast.client.test.TestHazelcastFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

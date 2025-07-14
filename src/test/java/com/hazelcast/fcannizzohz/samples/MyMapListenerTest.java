@@ -7,9 +7,13 @@ import com.hazelcast.map.listener.EntryUpdatedListener;
 import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
-public class MyMapListenerTest extends HazelcastTestSupport {
+public class MyMapListenerTest
+        extends HazelcastTestSupport {
 
     @Test
     public void updateTriggersListener() {

@@ -13,7 +13,6 @@ import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,7 +33,8 @@ import static org.mockito.Mockito.when;
  * </ul>
  * </p>
  */
-public class CustomerServiceComponentTest extends HazelcastTestSupport {
+public class CustomerServiceComponentTest
+        extends HazelcastTestSupport {
 
     private static final String CREATE_TABLE_SQL = "CREATE TABLE customers (id VARCHAR PRIMARY KEY, name VARCHAR)";
     private static final String DROP_TABLE_SQL = "DROP TABLE customers";
@@ -67,10 +67,7 @@ public class CustomerServiceComponentTest extends HazelcastTestSupport {
         Config config = new Config();
         config.setClusterName(randomName());
         // inject custom Map Store
-        config.getMapConfig("customers")
-              .getMapStoreConfig()
-              .setEnabled(true)
-              .setImplementation(new SQLCustomerMapStore(conn));
+        config.getMapConfig("customers").getMapStoreConfig().setEnabled(true).setImplementation(new SQLCustomerMapStore(conn));
         assertNotNull(conn);
         // Start a real embedded Hazelcast instance
         hz = createHazelcastInstance(config);

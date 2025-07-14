@@ -55,8 +55,7 @@ public class IsolatedClustersTest {
         // Custom business logic
         IMap<String, Integer> map = client.getMap("isolatedMap");
         map.put("key", 1);
-        map.executeOnKey("key", (EntryProcessor<String, Integer, Integer>)
-                entry -> entry.setValue(entry.getValue() + 1));
+        map.executeOnKey("key", (EntryProcessor<String, Integer, Integer>) entry -> entry.setValue(entry.getValue() + 1));
 
         // verify cluster formed and data is available
         assertClusterSizeEventually(2, members[0]);
@@ -68,8 +67,7 @@ public class IsolatedClustersTest {
         // Custom business logic
         IMap<String, Integer> map = client.getMap("isolatedMap");
         map.put("key", 1);
-        map.executeOnKey("key", (EntryProcessor<String, Integer, Integer>)
-                entry -> entry.setValue(entry.getValue() - 1));
+        map.executeOnKey("key", (EntryProcessor<String, Integer, Integer>) entry -> entry.setValue(entry.getValue() - 1));
 
         // verify cluster formed and data is processed
         assertClusterSizeEventually(2, members[0]);
