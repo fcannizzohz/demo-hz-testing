@@ -13,6 +13,8 @@ import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,6 +35,7 @@ import static org.mockito.Mockito.when;
  * </ul>
  * </p>
  */
+@RunWith(JUnit4.class)
 public class CustomerServiceComponentTest
         extends HazelcastTestSupport {
 

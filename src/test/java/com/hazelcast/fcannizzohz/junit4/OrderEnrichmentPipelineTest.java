@@ -21,6 +21,8 @@ import com.hazelcast.map.IMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.util.concurrent.CompletionException;
 
@@ -28,6 +30,7 @@ import static com.hazelcast.jet.core.test.JetAssert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(JUnit4.class)
 public class OrderEnrichmentPipelineTest
         extends JetTestSupport {
     private HazelcastInstance instance;

@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit4;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
@@ -18,8 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(HazelcastSerialClassRunner.class)
-public class FlakyTest
-        extends HazelcastTestSupport {
+public class FlakyTest extends HazelcastTestSupport {
 
     private static final AtomicInteger run = new AtomicInteger();
     private static final AtomicInteger counter = new AtomicInteger();

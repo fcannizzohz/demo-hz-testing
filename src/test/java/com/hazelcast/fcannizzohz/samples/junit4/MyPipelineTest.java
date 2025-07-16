@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit4;
 
 import com.hazelcast.collection.IList;
 import com.hazelcast.config.Config;
@@ -10,9 +10,12 @@ import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
 import com.hazelcast.jet.pipeline.test.TestSources;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(JUnit4.class)
 public class MyPipelineTest
         extends JetTestSupport {
 

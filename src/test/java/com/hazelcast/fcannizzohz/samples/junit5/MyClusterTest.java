@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit5;
 
 import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.core.HazelcastInstance;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MyJupiterClusterTest {
+class MyClusterTest {
 
     private static HazelcastInstance member1;
     private static HazelcastInstance member2;

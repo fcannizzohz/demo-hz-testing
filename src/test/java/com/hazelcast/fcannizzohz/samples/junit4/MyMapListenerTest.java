@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit4;
 
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
@@ -6,12 +6,15 @@ import com.hazelcast.map.IMap;
 import com.hazelcast.map.listener.EntryUpdatedListener;
 import com.hazelcast.test.HazelcastTestSupport;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+@RunWith(JUnit4.class)
 public class MyMapListenerTest
         extends HazelcastTestSupport {
 

@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit4;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;

@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit5;
 
 import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.collection.IList;
@@ -9,7 +9,6 @@ import com.hazelcast.jet.Job;
 import com.hazelcast.jet.config.JetConfig;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
-import com.hazelcast.jet.pipeline.test.AssertionCompletedException;
 import com.hazelcast.jet.pipeline.test.GeneratorFunction;
 import com.hazelcast.jet.pipeline.test.TestSources;
 import com.hazelcast.map.IMap;
@@ -27,21 +26,20 @@ import static com.hazelcast.jet.pipeline.test.Assertions.assertContains;
 import static com.hazelcast.jet.pipeline.test.Assertions.assertOrdered;
 import static com.hazelcast.test.HazelcastTestSupport.assertSizeEventually;
 import static com.hazelcast.test.HazelcastTestSupport.spawn;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-record Customer(String id, String name) implements Serializable {
-}
 
-class MyCustomerGen implements Serializable, GeneratorFunction<Customer> {
-    @Override
-    public Customer generate(long timestamp, long nextId) throws Exception {
-        return new Customer("ID_" + timestamp, "NAME_" + nextId);
+class MyPipelineTest {
+    record Customer(String id, String name) implements Serializable {
     }
-}
 
-class MyPipeline5Test {
+    static class MyCustomerGen implements Serializable, GeneratorFunction<Customer> {
+        @Override
+        public Customer generate(long timestamp, long nextId) {
+            return new Customer("ID_" + timestamp, "NAME_" + nextId);
+        }
+    }
 
     @Test
     void testSimplePipeline() {
@@ -160,7 +158,7 @@ class MyPipeline5Test {
         Pipeline p = Pipeline.create();
         p.readFrom(TestSources.items("c1", "c2"))
          .mapUsingIMap("customers",
-                 id -> id, (id, customer) -> ((Customer) customer).name())
+                 id -> id, (_, customer) -> ((Customer) customer).name())
          .writeTo(Sinks.list("enriched"));
         jet.newJob(p).join();
 

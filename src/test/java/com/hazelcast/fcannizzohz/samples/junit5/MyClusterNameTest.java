@@ -1,4 +1,4 @@
-package com.hazelcast.fcannizzohz.samples;
+package com.hazelcast.fcannizzohz.samples.junit5;
 
 import com.hazelcast.client.test.TestHazelcastFactory;
 import com.hazelcast.config.Config;
@@ -10,19 +10,17 @@ import org.junit.jupiter.api.Test;
 
 import static com.hazelcast.test.HazelcastTestSupport.assertEqualsEventually;
 
-class MyJupiterClusterNameTest {
+class MyClusterNameTest {
 
-    private static TestHazelcastFactory factory;
     private static HazelcastInstance member1;
     private static HazelcastInstance member2;
-    private static HazelcastInstance client;
     private static String clusterName;
 
     @BeforeAll
     static void setupCluster() {
         clusterName = HazelcastTestSupport.randomName();
         Config config = new Config().setClusterName(clusterName);
-        factory = new TestHazelcastFactory(2);
+        TestHazelcastFactory factory = new TestHazelcastFactory(2);
         member1 = factory.newHazelcastInstance(config);
         member2 = factory.newHazelcastInstance(config);
     }
