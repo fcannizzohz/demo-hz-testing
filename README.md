@@ -3,35 +3,9 @@
 Testing applications that use Hazelcast (IMDG and Streaming) requires care to validate the behaviour at various levels - from
 unit to system tests - given Hazelcast’s distributed, eventually consistent and asynchronous behaviour.
 
-## Mocking Hazelcast Interfaces
+Hazelcast provides tools to simplify writing unit/component/integration tests of such applications.
 
-Mocking Hazelcast APIs allows you to isolate the class under test and control its dependencies. The advantages of this approach
-are:
-
-- **Isolation**: the test only focuses on testing the logic of the class under test
-- **Speed**: it may be faster to run as it doesn't need Hazelcast to run
-- **Control**: it's easier to setup edge cases (null, exceptions). For example `when(map.get("404")).thenReturn(null)`
-
-While useful, mocking Hazelcast interfaces should be done with care. It is considered an antipattern to mock external interfaces
-(see paragraph 4.1 of [this paper](http://jmock.org/oopsla2004.pdf)), especially interfaces you don’t own, because:
-
-- Brittleness: Tests may break when Hazelcast changes its API or behaviour
-- Blind spots: It skips real Hazelcast behaviour such as:
-    - Serialization/deserialization
-    - Key/value validations
-    - TTLs, eviction policies
-    - Event listeners, interceptors
-
-An example of mocking Hazelcast interfaces is:
-
-```java
-    @Test
-    void testFindCustomerWithMock() {
-        when(hzInstance.getMap("customers")).thenReturn((IMap) customerMap);
-        when(customerMap.get("123")).thenReturn(new Customer("123", "Alice"));
-        assertEquals("Alice", service.findCustomer("123").name());
-    }
-```
+This project demonstrates the use of these tools. Full documentation is available in the [Hazelcast official documentation](https://docs.hazelcast.com/hazelcast/5.5/test/testing-apps#hide-nav).
 
 ## Testing with embedded Hazelcast mock network
 
@@ -53,8 +27,6 @@ To run the tests with the full network stack the system property `hazelcast.test
 `$> mvn test -Dhazelcast.test.use.network=true`
 
 In this case, the tests will run considerably slower that if they were executed with the mock network with `$> mvn test`
-
-### Differences between the vairous options
 
 ### Setting up the Hazelcast Test support
 
@@ -85,58 +57,6 @@ as well as the use of JUnit 4 and OpenTest4J:
       <scope>test</scope>
    </dependency>
 ```
-
-### Using `HazelcastTestSupport`
-
-A test class wanting to use `HazelcastTestSupport` must extend it, for example:
-
-```java
-import com.hazelcast.test.HazelcastTestSupport;
-
-class CustomerServiceWithSupportTest extends HazelcastTestSupport {
-}
-```
-
-By doing so, it has access to a variety of utility methods for reuse, including `createHazelcastInstance()`.
-For example:
-
-```java
-    @Test
-    public void findCustomerSingleNode() {
-        HazelcastInstance instance = createHazelcastInstance();
-        instance.getMap("customers").put("123", new Customer("123", "Alice"));
-        HzCustomerService sut = new HzCustomerService(instance);
-        assertEquals("Alice", sut.findCustomer("123").name());
-    }
-```
-
-or, with a multi node setup:
-
-```java
-    @Test
-    public void findCustomerTwoNodes() {
-        HazelcastInstance[] instances = createHazelcastInstances(2);
-        HazelcastInstance node1 = instances[0];
-        HazelcastInstance node2 = instances[1];
-   
-        // data injected in node1
-        node1.getMap("customers").put("123", new Customer("123", "Alice"));
-   
-        // data retrieved from node2
-        HzCustomerService sut2 = new HzCustomerService(node2);
-        assertEquals("Alice", sut2.findCustomer("123").name());
-    }
-```
-
-> **NOTE**: When creating instances with `createHazelcastInstances()` it's best practice to shutdown them at the end of each test
-> to
-> free up resources and prevent test brittleness:
-> ```java
-> @After
-> public void tearDown() {
->    instance.shutdown();
-> }
-> ```
 
 ### Testing complex test scenarios
 
